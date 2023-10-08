@@ -1,40 +1,91 @@
 import pygame
-import Ajolote as aj 
+import Ajolote as aj
 from pygame.locals import *
 from OpenGL.GL import *
-from OpenGL.GLUT import *
 from OpenGL.GLU import *
-
-# Inicializa Pygame
-pygame.init()
-
-# Configura la ventana Pygame
-display = (800, 600)
-pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
-pygame.display.set_caption("Ajolote")
-
-# Fuente para el texto del menú
-font = pygame.font.Font(None, 24)
-
-#Inicializar arreglos de eventos
-keys = [False] * 7
-
-# Cargando las texturas
-texture_background = pygame.image.load("fondos/1.jpg")
-texture_left = pygame.image.load("fondos/2.jpg")
-texture_right = pygame.image.load("fondos/2.jpg")
-texture_top = pygame.image.load("fondos/3.jpg")
-texture_bottom = pygame.image.load("fondos/3.jpg")
-
-# Configura la perspectiva OpenGL
-gluPerspective(45, (display[0] / display[1]), 0.1, 50.0)
-glTranslatef(0.0, 0.0, -5)
+import os
 
 # Variables para el control del mouse
 rotating = False
 prev_mouse_x = 0
 prev_mouse_y = 0
 rotation_speed = 0.5
+
+fondo=False
+
+# Bandera para fondos
+cont = 0
+
+# Bandera para sonidos
+band = 10
+
+# Inicializa Pygame
+pygame.init()
+
+# Arreglo de Sonidos
+sound = []
+for i in os.listdir("Sounds"):
+    if i.endswith(".wav"):
+        sonido = pygame.mixer.Sound(os.path.join("Sounds", i))
+        sound.append(sonido)
+
+# Configura la ventana Pygame
+display = (800, 600)
+pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
+pygame.display.set_caption("Ajolote Lara Madero Axel 19280766            Teclas: C,H,A,D,E,T,M,I,L,P,O,V,K,+,-,Flecha Izq y Der")
+
+# Configura la perspectiva OpenGL
+gluPerspective(45, (display[0] / display[1]), 0.1, 50.0)
+glTranslatef(0.0, 0.0, -5)
+
+# Inicializar diccionario de eventos
+keys = {
+    "C": False,
+    "H": False,
+    "A": False,
+    "D": False,
+    "E": False,
+    "T": False,
+    "M": False,
+    "I": False,
+    "L": False,
+    "P": False,
+    "O": False,
+    "V": False,
+    "K": False,
+}
+
+# Matriz de raices
+fondos = [
+    "fondos/0.jpg",  # 0
+    "fondos/1.jpg",  # 1
+    "fondos/2.jpg",  # 2
+    "fondos/3.jpg",  # 3
+    "fondos/4.jpg",  # 4
+    "fondos/5.jpg",  # 5
+    "fondos/6.jpg",  # 6
+    "fondos/7.jpg",  # 7
+    "fondos/8.jpg",  # 8
+    "fondos/9.jpg",  # 9
+    "fondos/10.jpg",  # 10
+    "fondos/11.jpg",  # 11
+    "fondos/12.jpg",  # 12
+    "fondos/13.jpg",  # 13
+    "fondos/14.jpg",  # 14
+]
+
+texture_background = pygame.image.load(fondos[2])
+texture_left_right = pygame.image.load(fondos[0])
+texture_top_bottom = pygame.image.load(fondos[1])
+
+
+# Cargando las texturas
+def inicializarTexturas(fondo_NB, fondo_NLR, fondo_NTB):
+    global texture_left_right, texture_background, texture_top_bottom
+    texture_background = pygame.image.load(fondos[fondo_NB])
+    texture_left_right = pygame.image.load(fondos[fondo_NLR])
+    texture_top_bottom = pygame.image.load(fondos[fondo_NTB])
+
 
 # Función para manejar los eventos del mouse
 def handle_mouse_events(event):
@@ -54,10 +105,13 @@ def handle_mouse_events(event):
         glRotatef(delta_x * rotation_speed, 0, 1, 0)
         glRotatef(delta_y * rotation_speed, 1, 0, 0)
 
-#Reestablecer eventos de Mouse
+
+# Reestablecer eventos de Mouse
 def reloadKeys():
-    for i in range(len(keys)):
-        keys[i]=False
+    global keys
+    for key in keys:
+        keys[key] = False
+
 
 # Función para cargar una textura OpenGL
 def load_texture(texture_surface):
@@ -68,12 +122,26 @@ def load_texture(texture_surface):
     glBindTexture(GL_TEXTURE_2D, texture_id)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture_data)
-
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGB,
+        width,
+        height,
+        0,
+        GL_RGB,
+        GL_UNSIGNED_BYTE,
+        texture_data,
+    )
     return texture_id
 
-#Dibujar cubo de texturas
+
+# Dibujar cubo de texturas
 def texturas():
+    # Establecimiento de texturas en formato OpenGL
+    texture_background_id = load_texture(texture_background)
+    texture_left_right_id = load_texture(texture_left_right)
+    texture_top_bottom_id = load_texture(texture_top_bottom)
     # Dibuja un cubo con texturas
     glEnable(GL_TEXTURE_2D)
     glBindTexture(GL_TEXTURE_2D, texture_background_id)
@@ -88,7 +156,7 @@ def texturas():
     glVertex3f(-10, 10, -10)
     glEnd()
 
-    glBindTexture(GL_TEXTURE_2D, texture_left_id)
+    glBindTexture(GL_TEXTURE_2D, texture_left_right_id)
     glBegin(GL_QUADS)
     glTexCoord2f(0, 0)
     glVertex3f(-10, -10, -10)
@@ -100,7 +168,7 @@ def texturas():
     glVertex3f(-10, 10, -10)
     glEnd()
 
-    glBindTexture(GL_TEXTURE_2D, texture_right_id)
+    glBindTexture(GL_TEXTURE_2D, texture_left_right_id)
     glBegin(GL_QUADS)
     glTexCoord2f(0, 0)
     glVertex3f(10, -10, -10)
@@ -112,7 +180,7 @@ def texturas():
     glVertex3f(10, 10, -10)
     glEnd()
 
-    glBindTexture(GL_TEXTURE_2D, texture_top_id)
+    glBindTexture(GL_TEXTURE_2D, texture_top_bottom_id)
     glBegin(GL_QUADS)
     glTexCoord2f(0, 0)
     glVertex3f(-10, 10, -10)
@@ -124,7 +192,7 @@ def texturas():
     glVertex3f(-10, 10, 10)
     glEnd()
 
-    glBindTexture(GL_TEXTURE_2D, texture_bottom_id)
+    glBindTexture(GL_TEXTURE_2D, texture_top_bottom_id)
     glBegin(GL_QUADS)
     glTexCoord2f(0, 0)
     glVertex3f(-10, -10, -10)
@@ -153,46 +221,113 @@ def inicializarBrillo():
     glEnable(GL_LIGHT0)
     glEnable(GL_DEPTH_TEST)
 
-#Establecimiento de texturas en formato OpenGL
-texture_background_id = load_texture(texture_background)
-texture_left_id = load_texture(texture_left)
-texture_right_id = load_texture(texture_right)
-texture_top_id = load_texture(texture_top)
-texture_bottom_id = load_texture(texture_bottom)
+def stopSound():
+    global fondo
+    for i in range(0,13):
+        if not(i == 9 and fondo):
+            sound[i].stop()
 
+def repSonido(bandera):
+    stopSound()
+    if bandera == 10:
+        sound[0].play()
+    if bandera == 11:
+        sound[1].play()
+    if bandera == 12:
+        sound[2].play()
+    if bandera == 13:
+        sound[3].play()
+    if bandera == 14:
+        sound[4].play()
+    if bandera == 15:
+        sound[5].play()
+    if bandera == 16:
+        sound[6].play()
+    if bandera == 17:
+        sound[7].play()
+    if bandera == 18:
+        sound[8].play()
+    if bandera == 19:
+        sound[10].play()
+    if bandera == 20:
+        sound[11].play()
+    if bandera == 21:
+        sound[12].play()
+    if bandera == 22:
+        sound[13].play()
+        
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             quit()
         elif event.type == pygame.KEYDOWN:
-            reloadKeys()
-            if event.key == pygame.K_c:
-                keys[0]=True
-            elif event.key == pygame.K_h:
-                keys[1]=True
-            elif event.key == pygame.K_a:
-                keys[2]=True
-            elif event.key == pygame.K_d:
-                keys[3]=True
-            elif event.key == pygame.K_e:
-                keys[4]=True
-            elif event.key == pygame.K_t:
-                keys[5]=True
-            elif event.key == pygame.K_m:
-                keys[6]=True
-            elif event.key == pygame.K_MINUS:
-                glTranslatef(0,0,-0.1)
-            elif event.key == pygame.K_PLUS:
-                glTranslatef(0,0,0.1)
+            print()
+            if event.key == pygame.K_MINUS:  # Zoom out
+                glTranslatef(0, 0, -0.1)
+            elif event.key == pygame.K_PLUS:  # Zoom in
+                glTranslatef(0, 0, 0.1)
+            elif event.key == pygame.K_s:
+                if fondo:
+                    sound[9].stop()
+                else:
+                    sound[9].play()
+                    fondo=True
+            elif event.key == pygame.K_RIGHT:  # Cambios de fondo hacia adelante
+                if cont < 4:
+                    cont += 1
+                else:
+                    cont = 0
+            elif event.key == pygame.K_LEFT:  # Cambio de fondo hacia atrás
+                if cont > 0:
+                    cont -= 1
+                else:
+                    cont = 4
+            try:
+                if chr(event.key).upper() in keys and keys[chr(event.key).upper()] == False:
+                    reloadKeys()
+                    print("Entró")
+                    keys[chr(event.key).upper()] = True
+                    if band < 22:
+                        repSonido(band)
+                        band += 1
+                    else:
+                        repSonido(22)
+                        band=10
+                else:
+                    keys[chr(event.key).upper()] = False
+            except:
+                print("Error") 
+            
+        if cont == 0:
+            inicializarTexturas(2, 0, 1)
+        elif cont == 1:
+            inicializarTexturas(8, 5, 4)
+        elif cont == 2:
+            inicializarTexturas(3, 7, 9)
+        elif cont == 3:
+            inicializarTexturas(11, 10, 9)
+        elif cont == 4:
+            inicializarTexturas(12, 14, 8)
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        
-        texturas()   
-        inicializarBrillo()     
-
-        aj.dibujaAjolote(keys[0],keys[1],keys[2],keys[3],keys[4],keys[5],keys[6])
-        
+        texturas()
+        inicializarBrillo()
+        aj.dibujaAjolote(
+            keys["C"],
+            keys["H"],
+            keys["A"],
+            keys["D"],
+            keys["E"],
+            keys["T"],
+            keys["M"],
+            keys["I"],
+            keys["L"],
+            keys["P"],
+            keys["O"],
+            keys["V"],
+            keys["K"],
+        )
         handle_mouse_events(event)
         pygame.display.flip()
         pygame.time.wait(10)
