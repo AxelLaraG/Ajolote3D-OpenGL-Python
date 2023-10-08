@@ -11,6 +11,7 @@ prev_mouse_x = 0
 prev_mouse_y = 0
 rotation_speed = 0.5
 
+#Identifica si el sonido de fondo se está reproduciendo
 fondo=False
 
 # Bandera para fondos
@@ -32,7 +33,7 @@ for i in os.listdir("Sounds"):
 # Configura la ventana Pygame
 display = (800, 600)
 pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
-pygame.display.set_caption("Ajolote Lara Madero Axel 19280766            Teclas: C,H,A,D,E,T,M,I,L,P,O,V,K,+,-,Flecha Izq y Der")
+pygame.display.set_caption("Ajolote:Lara Madero Axel 19280766   Gestos:H,E,T,M,I,L,K   Movimientos:C,A,D,P,O,V,K,S   Otros:+,-,flecha Izq y Der")
 
 # Configura la perspectiva OpenGL
 gluPerspective(45, (display[0] / display[1]), 0.1, 50.0)
@@ -40,19 +41,19 @@ glTranslatef(0.0, 0.0, -5)
 
 # Inicializar diccionario de eventos
 keys = {
-    "C": False,
-    "H": False,
-    "A": False,
-    "D": False,
-    "E": False,
-    "T": False,
-    "M": False,
-    "I": False,
-    "L": False,
-    "P": False,
-    "O": False,
-    "V": False,
-    "K": False,
+    "C": False, #Mov 1
+    "H": False, #Gesto 1
+    "A": False, #Mov 2
+    "D": False, #Mov 3
+    "E": False, #Gesto 2
+    "T": False, #Gesto 3
+    "M": False, #Gesto 4
+    "I": False, #Gesto 5
+    "L": False, #Gesto 6
+    "P": False, #Mov 4
+    "O": False, #Mov 5
+    "V": False, #Mov 6
+    "K": False, #Gesto 7
 }
 
 # Matriz de raices
@@ -270,6 +271,7 @@ while True:
             elif event.key == pygame.K_s:
                 if fondo:
                     sound[9].stop()
+                    fondo=False
                 else:
                     sound[9].play()
                     fondo=True
@@ -283,10 +285,11 @@ while True:
                     cont -= 1
                 else:
                     cont = 4
-            try:
-                if chr(event.key).upper() in keys and keys[chr(event.key).upper()] == False:
+            else:
+                val1=chr(event.key).upper() in keys
+                val2=keys[chr(event.key).upper()] == False
+                if val1 and val2:
                     reloadKeys()
-                    print("Entró")
                     keys[chr(event.key).upper()] = True
                     if band < 22:
                         repSonido(band)
@@ -296,19 +299,17 @@ while True:
                         band=10
                 else:
                     keys[chr(event.key).upper()] = False
-            except:
-                print("Error") 
-            
-        if cont == 0:
-            inicializarTexturas(2, 0, 1)
-        elif cont == 1:
-            inicializarTexturas(8, 5, 4)
-        elif cont == 2:
-            inicializarTexturas(3, 7, 9)
-        elif cont == 3:
-            inicializarTexturas(11, 10, 9)
-        elif cont == 4:
-            inicializarTexturas(12, 14, 8)
+        
+            if cont == 0:
+                inicializarTexturas(2, 0, 1)
+            elif cont == 1:
+                inicializarTexturas(8, 5, 4)
+            elif cont == 2:
+                inicializarTexturas(3, 7, 9)
+            elif cont == 3:
+                inicializarTexturas(11, 10, 9)
+            elif cont == 4:
+                inicializarTexturas(12, 14, 8)
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         texturas()
